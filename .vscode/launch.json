@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch file",
+            "type": "go",
+            "trace": "verbose",
+            "showLog": true,
+            "logOutput": "dap",
+            "request": "launch",
+            "mode": "auto",
+            "program": ".",
+            "env": {},
+            "args": [
+                "--",
+                "arg1",
+                "arg2",
+                "arg3"
+            ]
+        }
+    ]
+}
