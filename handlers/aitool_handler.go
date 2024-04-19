@@ -31,7 +31,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		TotalPages int64         `json:"totalPages"`
 	}
 
-	res := ResponseBody{aitools, totalPages}
+	res := ResponseBody{aitools, totalPages / int64(size)}
 
 	json.NewEncoder(w).Encode(res)
 }
