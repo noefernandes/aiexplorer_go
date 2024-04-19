@@ -22,10 +22,10 @@ func main() {
 
 	r.Use(c.Handler)
 
-	r.Get(BASE_URL+"/", handlers.GetAll)
+	r.Get(BASE_URL, handlers.GetAll)
 	r.Get(BASE_URL+"/{id}", handlers.Get)
-	r.Post(BASE_URL+"/", handlers.Save)
-	r.Put(BASE_URL+"/", handlers.Update)
+	r.Post(BASE_URL, handlers.Save)
+	r.Put(BASE_URL, handlers.Update)
 
 	http.ListenAndServe(":9000", r)
 }

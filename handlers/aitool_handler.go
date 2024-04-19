@@ -10,12 +10,20 @@ import (
 )
 
 func GetAll(w http.ResponseWriter, r *http.Request) {
-	aitools, err := data.GetAll()
+	size, err1 := strconv.Atoi(r.URL.Query().Get("size"))
+	page, err2 := strconv.Atoi(r.URL.Query().Get("page"))
+
+	if err1 != nil || err2 != nil {
+		return
+	}
+
+	aitools, err := data.GetAll(page, size)
 
 	w.Header().Add("Content-Type", "application/json")
 
 	if err != nil {
 		json.NewEncoder(w).Encode(err)
+		return
 	}
 
 	json.NewEncoder(w).Encode(aitools)
