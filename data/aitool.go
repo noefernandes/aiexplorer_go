@@ -11,7 +11,6 @@ type AITool struct {
 	Name             string `json:"name"`
 	ShortDescription string `json:"short_description"`
 	Description      string `json:"description"`
-	Tags             []Tag  `json:"tags"`
 	ProfilePicture   string `json:"profile_picture"`
 	SiteUrl          string `json:"site_url"`
 	InstagramUrl     string `json:"instagram_url"`
@@ -62,4 +61,43 @@ func Get(id int) (aitool *AITool, err error) {
 
 	return
 
+}
+
+func Save(aitool *AITool) (returned AITool, err error) {
+	var data []AITool
+	client, err := db.OpenConnection()
+
+	if err != nil {
+		return
+	}
+
+	q := client.From("aitool").Insert(aitool, false, "do-nothing", "", "")
+	_, err = q.ExecuteTo(&data)
+
+	returned = data[0]
+
+	return
+}
+
+func Update(aitool *AITool) (returned *AITool, err error) {
+	var data []AITool
+	client, err := db.OpenConnection()
+
+	if err != nil {
+		return
+	}
+
+	q := client.From("aitool").Update(aitool, "", "").Eq("id", strconv.Itoa(aitool.ID))
+	_, err = q.ExecuteTo(&data)
+
+	if err != nil {
+		returned = nil
+		return
+	}
+
+	if len(data) != 0 {
+		returned = &data[0]
+	}
+
+	return
 }

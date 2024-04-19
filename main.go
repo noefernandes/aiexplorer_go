@@ -8,6 +8,8 @@ import (
 	"github.com/rs/cors"
 )
 
+const BASE_URL = "/api/v1/aitool"
+
 func main() {
 	r := chi.NewRouter()
 
@@ -20,8 +22,10 @@ func main() {
 
 	r.Use(c.Handler)
 
-	r.Get("/", handlers.GetAll)
-	r.Get("/{id}", handlers.Get)
+	r.Get(BASE_URL+"/", handlers.GetAll)
+	r.Get(BASE_URL+"/{id}", handlers.Get)
+	r.Post(BASE_URL+"/", handlers.Save)
+	r.Put(BASE_URL+"/", handlers.Update)
 
 	http.ListenAndServe(":9000", r)
 }

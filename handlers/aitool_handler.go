@@ -51,3 +51,62 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		w.Write(data)
 	}
 }
+
+func Save(w http.ResponseWriter, r *http.Request) {
+	var aitool *data.AITool
+	err := json.NewDecoder(r.Body).Decode(&aitool)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := data.Save(aitool)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data, err := json.Marshal(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	w.Write(data)
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	var aitool *data.AITool
+	err := json.NewDecoder(r.Body).Decode(&aitool)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	result, err := data.Update(aitool)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	encoded, err := json.Marshal(result)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if result != nil {
+		w.WriteHeader(http.StatusCreated)
+		w.Write(encoded)
+		return
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+}
