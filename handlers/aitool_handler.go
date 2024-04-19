@@ -38,8 +38,6 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 
-	w.WriteHeader(http.StatusNotFound)
-
 	if aitool != nil {
 		w.WriteHeader(http.StatusOK)
 		data, err := json.Marshal(aitool)
@@ -49,7 +47,10 @@ func Get(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Write(data)
+		return
 	}
+
+	w.WriteHeader(http.StatusNotFound)
 }
 
 func Save(w http.ResponseWriter, r *http.Request) {
