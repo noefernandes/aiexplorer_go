@@ -17,7 +17,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	aitools, err := data.GetAll(page, size)
+	aitools, totalPages, err := data.GetAll(page, size)
 
 	w.Header().Add("Content-Type", "application/json")
 
@@ -26,7 +26,14 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(aitools)
+	type ResponseBody struct {
+		Content    []data.AITool `json:"content"`
+		TotalPages int64         `json:"totalPages"`
+	}
+
+	res := ResponseBody{aitools, totalPages}
+
+	json.NewEncoder(w).Encode(res)
 }
 
 func Get(w http.ResponseWriter, r *http.Request) {

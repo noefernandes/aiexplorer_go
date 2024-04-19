@@ -21,14 +21,14 @@ type AITool struct {
 	UpdatedAt        string `json:"updated_at"`
 }
 
-func GetAll(page int, size int) (aitools []AITool, err error) {
+func GetAll(page int, size int) (aitools []AITool, count int64, err error) {
 	client, err := db.OpenConnection()
 
 	if err != nil {
 		return
 	}
 
-	data, _, err := client.From("aitool").Select("*", "exact", false).Range(page*size, (page+1)*size-1, "").Execute()
+	data, count, err := client.From("aitool").Select("*", "exact", false).Range(page*size, (page+1)*size-1, "").Execute()
 
 	if err != nil {
 		return
@@ -36,6 +36,27 @@ func GetAll(page int, size int) (aitools []AITool, err error) {
 
 	err = json.Unmarshal(data, &aitools)
 
+	return
+}
+
+func Count() (count int, err error) {
+	client, err := db.OpenConnection()
+
+	if err != nil {
+		return
+	}
+
+	data, value, err := client.From("aitool").Select("*", "exact", false).Execute()
+
+	if value == 1 {
+
+	}
+
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(data, &count)
 	return
 }
 
