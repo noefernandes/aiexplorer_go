@@ -69,7 +69,7 @@ func Get(w http.ResponseWriter, r *http.Request) {
 }
 
 func Save(w http.ResponseWriter, r *http.Request) {
-	var aitool *data.AITool
+	var aitool *data.AIToolInput
 	err := json.NewDecoder(r.Body).Decode(&aitool)
 
 	if err != nil {

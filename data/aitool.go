@@ -21,6 +21,20 @@ type AITool struct {
 	UpdatedAt        string `json:"updatedAt"`
 }
 
+type AIToolInput struct {
+	Name             string `json:"name"`
+	ShortDescription string `json:"shortDescription"`
+	Description      string `json:"description"`
+	ProfilePicture   string `json:"profilePicture"`
+	SiteUrl          string `json:"siteUrl"`
+	InstagramUrl     string `json:"instagramUrl"`
+	DiscordUrl       string `json:"discordUrl"`
+	LinkedinUrl      string `json:"linkedinUrl"`
+	GithubUrl        string `json:"githubUrl"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
+}
+
 func GetAll(page int, size int) (aitools []AITool, count int64, err error) {
 	client, err := db.OpenConnection()
 
@@ -63,7 +77,7 @@ func Get(id int) (aitool *AITool, err error) {
 
 }
 
-func Save(aitool *AITool) (returned AITool, err error) {
+func Save(aitool *AIToolInput) (returned AITool, err error) {
 	var data []AITool
 	client, err := db.OpenConnection()
 
