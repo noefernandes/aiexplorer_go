@@ -39,27 +39,6 @@ func GetAll(page int, size int) (aitools []AITool, count int64, err error) {
 	return
 }
 
-func Count() (count int, err error) {
-	client, err := db.OpenConnection()
-
-	if err != nil {
-		return
-	}
-
-	data, value, err := client.From("aitool").Select("*", "exact", false).Execute()
-
-	if value == 1 {
-
-	}
-
-	if err != nil {
-		return
-	}
-
-	err = json.Unmarshal(data, &count)
-	return
-}
-
 func Get(id int) (aitool *AITool, err error) {
 	client, err := db.OpenConnection()
 

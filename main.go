@@ -14,7 +14,7 @@ func main() {
 	r := chi.NewRouter()
 
 	c := cors.New(cors.Options{
-		AllowedHeaders:   []string{"Content-Type", "Accept", "Origin", "Authorization"},
+		AllowedHeaders:   []string{"Content-Type", "Accept", "Origin", "Authorization", "Access-Control-Allow-Origin"},
 		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
