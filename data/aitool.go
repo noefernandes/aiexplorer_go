@@ -74,7 +74,9 @@ func Save(aitool *AITool) (returned AITool, err error) {
 	q := client.From("aitool").Insert(aitool, false, "do-nothing", "", "")
 	_, err = q.ExecuteTo(&data)
 
-	returned = data[0]
+	if len(data) != 0 {
+		returned = data[0]
+	}
 
 	return
 }
