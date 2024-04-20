@@ -9,16 +9,16 @@ import (
 type AITool struct {
 	ID               int    `json:"id"`
 	Name             string `json:"name"`
-	ShortDescription string `json:"short_description"`
+	ShortDescription string `json:"shortDescription"`
 	Description      string `json:"description"`
-	ProfilePicture   string `json:"profile_picture"`
-	SiteUrl          string `json:"site_url"`
-	InstagramUrl     string `json:"instagram_url"`
-	DiscordUrl       string `json:"discord_url"`
-	LinkedinUrl      string `json:"linkedin_url"`
-	GithubUrl        string `json:"github_url"`
-	CreatedAt        string `json:"created_at"`
-	UpdatedAt        string `json:"updated_at"`
+	ProfilePicture   string `json:"profilePicture"`
+	SiteUrl          string `json:"siteUrl"`
+	InstagramUrl     string `json:"instagramUrl"`
+	DiscordUrl       string `json:"discordUrl"`
+	LinkedinUrl      string `json:"linkedinUrl"`
+	GithubUrl        string `json:"githubUrl"`
+	CreatedAt        string `json:"createdAt"`
+	UpdatedAt        string `json:"updatedAt"`
 }
 
 func GetAll(page int, size int) (aitools []AITool, count int64, err error) {
