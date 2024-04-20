@@ -91,6 +91,8 @@ func Save(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Add("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write(data)
 }
@@ -123,6 +125,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		w.Write(encoded)
 		return
 	}
+
+	w.Header().Add("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusNotFound)
 }
