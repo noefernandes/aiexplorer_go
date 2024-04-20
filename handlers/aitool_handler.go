@@ -92,7 +92,6 @@ func Save(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write(data)
@@ -128,6 +127,5 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusNotFound)
 }
