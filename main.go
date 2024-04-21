@@ -25,7 +25,7 @@ func main() {
 	r.Get(BASE_URL+"/{id}", handlers.Get)
 	r.Post(BASE_URL, handlers.Save)
 	r.Put(BASE_URL, handlers.Update)
-	r.Delete(BASE_URL+"/{id}", handlers.Delete)
+	r.Delete(BASE_URL, handlers.Delete)
 
 	http.ListenAndServe(":9000", r)
 }
