@@ -3,6 +3,7 @@ package data
 import (
 	"aiexplorer/db"
 	"encoding/json"
+	"fmt"
 	"strconv"
 )
 
@@ -106,14 +107,23 @@ func Update(aitool *AITool) (returned *AITool, err error) {
 	q := client.From("aitool").Update(aitool, "", "").Eq("id", strconv.Itoa(aitool.ID))
 	_, err = q.ExecuteTo(&data)
 
-	if err != nil {
-		returned = nil
-		return
-	}
-
 	if len(data) != 0 {
 		returned = &data[0]
 	}
+
+	return
+}
+
+func Delete(id int) (err error) {
+	client, err := db.OpenConnection()
+
+	if err != nil {
+		return
+	}
+
+	data, count, err := client.From("aitool").Delete("", "").Eq("id", strconv.Itoa(id)).Execute()
+
+	fmt.Print(data, count)
 
 	return
 }
