@@ -131,14 +131,15 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	var aitool data.AITool
+	err := json.NewDecoder(r.Body).Decode(&aitool)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = data.Delete(id)
+	err = data.Delete(aitool.ID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
