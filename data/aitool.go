@@ -26,6 +26,7 @@ type AIToolInput struct {
 	Name             string `json:"name"`
 	ShortDescription string `json:"shortDescription"`
 	Description      string `json:"description"`
+	Tags             []Tag  `json:"tags"`
 	ProfilePicture   string `json:"profilePicture"`
 	SiteUrl          string `json:"siteUrl"`
 	InstagramUrl     string `json:"instagramUrl"`
@@ -86,11 +87,27 @@ func Save(aitool *AIToolInput) (returned AITool, err error) {
 		return
 	}
 
+	tagArray := aitool.Tags
+	aitool.Tags = nil
+
 	q := client.From("aitool").Insert(aitool, false, "do-nothing", "", "")
 	_, err = q.ExecuteTo(&data)
 
 	if len(data) != 0 {
 		returned = data[0]
+	}
+
+	for _, tag := range tagArray {
+		var aIToolTags AIToolTags
+		aIToolTags.TagId = tag.ID
+		aIToolTags.AIToolId = returned.ID
+
+		q := client.From("aitool_tags").Insert(aIToolTags, false, "do-nothing", "", "")
+		_, _, err = q.Execute()
+
+		if err != nil {
+			return
+		}
 	}
 
 	return
