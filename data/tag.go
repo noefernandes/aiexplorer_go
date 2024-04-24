@@ -2,8 +2,6 @@ package data
 
 import (
 	"aiexplorer/db"
-	"encoding/json"
-	"strconv"
 )
 
 type Tag struct {
@@ -12,66 +10,63 @@ type Tag struct {
 	Color string `json:"color"`
 }
 
-type TagInput struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
-}
-
 func GetAllTags() (tags []Tag, err error) {
-	client, err := db.OpenConnection()
+	conn, err := db.OpenConnection()
 
 	if err != nil {
 		return
 	}
 
-	data, _, err := client.From("tag").Select("*", "exact", false).Execute()
+	defer conn.Close()
 
+	rows, err := conn.Query("SELECT * FROM tag")
 	if err != nil {
 		return
 	}
 
-	err = json.Unmarshal(data, &tags)
+	for rows.Next() {
+		var tag Tag
+		err := rows.Scan(&tag.ID, &tag.Name, &tag.Color)
+		if err != nil {
+			continue
+		}
+		tags = append(tags, tag)
+	}
+
 	return
 }
 
-func GetTag(id int) (tag *Tag, err error) {
-	client, err := db.OpenConnection()
+func GetTag(id int) (tag Tag, err error) {
+	conn, err := db.OpenConnection()
 
 	if err != nil {
 		return
 	}
 
-	data, _, err := client.From("tag").Select("*", "", false).Eq("id", strconv.Itoa(id)).Single().Execute()
+	defer conn.Close()
 
-	if len(data) == 0 {
-		err = nil
-		return
-	}
+	sql := "SELECT * FROM tag WHERE id = $1"
 
-	if err != nil {
-		return
-	}
+	row := conn.QueryRow(sql, id)
 
-	err = json.Unmarshal(data, &tag)
+	err = row.Scan(&tag.ID, &tag.Name, &tag.Color)
 
 	return
 
 }
 
-func SaveTag(tag *TagInput) (returned Tag, err error) {
-	var data []Tag
-	client, err := db.OpenConnection()
+func SaveTag(tag *Tag) (returned Tag, err error) {
+	conn, err := db.OpenConnection()
 
 	if err != nil {
 		return
 	}
 
-	q := client.From("tag").Insert(tag, false, "do-nothing", "", "")
-	_, err = q.ExecuteTo(&data)
+	defer conn.Close()
 
-	if len(data) != 0 {
-		returned = data[0]
-	}
+	sql := `INSERT INTO tag (name, color) VALUES ($1, $2) RETURNING id, name, color`
+
+	err = conn.QueryRow(sql, tag.Name, tag.Color).Scan(&returned.ID, &returned.Name, &returned.Color)
 
 	return
 }

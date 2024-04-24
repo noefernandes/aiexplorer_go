@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"aiexplorer/data"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -31,7 +33,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		TotalPages int64         `json:"totalPages"`
 	}
 
-	res := ResponseBody{aitools, totalPages/int64(size) + 1}
+	res := ResponseBody{aitools, int64(totalPages/size) + 1}
 
 	json.NewEncoder(w).Encode(res)
 }
@@ -46,38 +48,40 @@ func Get(w http.ResponseWriter, r *http.Request) {
 
 	aitool, err := data.Get(id)
 
+	w.Header().Add("Content-Type", "application/json")
+
+	if errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
+	data, err := json.Marshal(aitool)
 
-	if aitool != nil {
-		w.WriteHeader(http.StatusOK)
-		data, err := json.Marshal(aitool)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		w.Write(data)
-		return
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	w.WriteHeader(http.StatusNotFound)
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 func Save(w http.ResponseWriter, r *http.Request) {
-	var aitool *data.AIToolInput
-	err := json.NewDecoder(r.Body).Decode(&aitool)
+	var aitool *data.AITool
 
+	err := json.NewDecoder(r.Body).Decode(&aitool)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	result, err := data.Save(aitool)
+
+	w.Header().Add("Content-Type", "application/json")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -90,8 +94,6 @@ func Save(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	w.Header().Add("Content-Type", "application/json")
 
 	w.WriteHeader(http.StatusCreated)
 	w.Write(data)
@@ -108,6 +110,11 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	result, err := data.Update(aitool)
 
+	if errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -120,14 +127,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if result != nil {
-		w.WriteHeader(http.StatusCreated)
-		w.Write(encoded)
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusNotFound)
+	w.WriteHeader(http.StatusOK)
+	w.Write(encoded)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
@@ -139,13 +140,26 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = data.Delete(aitool.ID)
+	res, err := data.Delete(aitool.ID)
+
+	w.Header().Add("Content-Type", "application/json")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
+	linesAffected, err := res.RowsAffected()
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if linesAffected < 1 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }

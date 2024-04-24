@@ -1,18 +1,23 @@
 package db
 
 import (
-	"os"
-
-	"github.com/supabase-community/supabase-go"
+	"aiexplorer/configs"
+	"database/sql"
+	"fmt"
 )
 
-func OpenConnection() (*supabase.Client, error) {
+func OpenConnection() (*sql.DB, error) {
+	conf := configs.GetDB()
 
-	client, err := supabase.NewClient(os.Getenv("PROJ_URL"), os.Getenv("API_KEY"), nil)
+	sc := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		conf.User, conf.Pass, conf.Host, conf.Port, conf.Database)
+	conn, err := sql.Open("postgres", sc)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return client, err
+	err = conn.Ping()
+
+	return conn, err
 }

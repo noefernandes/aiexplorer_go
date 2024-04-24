@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"aiexplorer/data"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -33,30 +35,30 @@ func GetTag(w http.ResponseWriter, r *http.Request) {
 
 	tag, err := data.GetTag(id)
 
+	w.Header().Add("Content-Type", "application/json")
+
+	if errors.Is(err, sql.ErrNoRows) {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
+	data, err := json.Marshal(tag)
 
-	if tag != nil {
-		w.WriteHeader(http.StatusOK)
-		data, err := json.Marshal(tag)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		w.Write(data)
-		return
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	w.WriteHeader(http.StatusNotFound)
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
 }
 
 func SaveTag(w http.ResponseWriter, r *http.Request) {
-	var tag *data.TagInput
+	var tag *data.Tag
 	err := json.NewDecoder(r.Body).Decode(&tag)
 
 	if err != nil {
