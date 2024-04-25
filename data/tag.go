@@ -19,7 +19,7 @@ func GetAllTags() (tags []Tag, err error) {
 
 	defer conn.Close()
 
-	rows, err := conn.Query("SELECT * FROM tag")
+	rows, err := conn.Query("SELECT id, name, color FROM tag")
 	if err != nil {
 		return
 	}
@@ -45,7 +45,7 @@ func GetTag(id int) (tag Tag, err error) {
 
 	defer conn.Close()
 
-	sql := "SELECT * FROM tag WHERE id = $1"
+	sql := "SELECT id, name, color FROM tag WHERE id = $1"
 
 	row := conn.QueryRow(sql, id)
 

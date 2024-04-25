@@ -30,7 +30,9 @@ func GetAll(page int, size int) (aitools []AITool, count int, err error) {
 
 	defer conn.Close()
 
-	sql := `SELECT * FROM aitool ORDER BY id LIMIT $1 OFFSET $2`
+	sql := `SELECT id, name, description, short_description, site_url,
+	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
+		tags, created_at, updated_at FROM aitool ORDER BY id LIMIT $1 OFFSET $2`
 
 	rows, err := conn.Query(sql, size, page*size)
 	if err != nil {
@@ -68,7 +70,11 @@ func Get(id int) (aitool AITool, err error) {
 
 	defer conn.Close()
 
-	row := conn.QueryRow("SELECT * FROM aitool WHERE id = $1", id)
+	sql := `SELECT id, name, description, short_Description, site_url,
+	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
+		tags, created_at, updated_at FROM aitool WHERE id = $1`
+
+	row := conn.QueryRow(sql, id)
 
 	err = row.Scan(&aitool.ID, &aitool.Name, &aitool.Description, &aitool.ShortDescription,
 		&aitool.SiteUrl, &aitool.InstagramUrl, &aitool.DiscordUrl, &aitool.LinkedinUrl,
@@ -84,6 +90,11 @@ func Save(aitool *AITool) (returned AITool, err error) {
 		return
 	}
 	defer conn.Close()
+
+	//remover
+	var date string = "12-10-1989"
+	aitool.CreatedAt = &date
+	aitool.UpdatedAt = &date
 
 	sql := `INSERT INTO aitool (name, description, short_description, site_url,
 	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 

@@ -11,6 +11,7 @@ func OpenConnection() (*sql.DB, error) {
 
 	sc := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
 		conf.User, conf.Pass, conf.Host, conf.Port, conf.Database)
+
 	conn, err := sql.Open("postgres", sc)
 
 	if err != nil {
