@@ -29,8 +29,8 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type ResponseBody struct {
-		Content    []data.AITool `json:"content"`
-		TotalPages int64         `json:"totalPages"`
+		Content    []*data.AITool `json:"content"`
+		TotalPages int64          `json:"totalPages"`
 	}
 
 	res := ResponseBody{aitools, int64(totalPages/size) + 1}

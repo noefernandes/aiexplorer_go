@@ -6,22 +6,22 @@ import (
 )
 
 type AITool struct {
-	ID               int     `json:"id"`
-	Name             *string `json:"name"`
-	ShortDescription *string `json:"short_description"`
-	Description      *string `json:"description"`
-	Tags             *string `json:"tags"`
-	ProfilePicture   *string `json:"profile_picture"`
-	SiteUrl          *string `json:"site_url"`
-	InstagramUrl     *string `json:"instagram_url"`
-	DiscordUrl       *string `json:"discord_url"`
-	LinkedinUrl      *string `json:"linkedin_url"`
-	GithubUrl        *string `json:"github_url"`
-	CreatedAt        *string `json:"created_at"`
-	UpdatedAt        *string `json:"updated_at"`
+	ID               int           `json:"id"`
+	Name             *string       `json:"name"`
+	ShortDescription *string       `json:"short_description"`
+	Description      *string       `json:"description"`
+	Tags             []*AIToolTags `json:"tags"`
+	ProfilePicture   *string       `json:"profile_picture"`
+	SiteUrl          *string       `json:"site_url"`
+	InstagramUrl     *string       `json:"instagram_url"`
+	DiscordUrl       *string       `json:"discord_url"`
+	LinkedinUrl      *string       `json:"linkedin_url"`
+	GithubUrl        *string       `json:"github_url"`
+	CreatedAt        *string       `json:"created_at"`
+	UpdatedAt        *string       `json:"updated_at"`
 }
 
-func GetAll(page int, size int) (aitools []AITool, count int, err error) {
+func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 	conn, err := db.OpenConnection()
 
 	if err != nil {
@@ -30,26 +30,66 @@ func GetAll(page int, size int) (aitools []AITool, count int, err error) {
 
 	defer conn.Close()
 
-	sql := `SELECT id, name, description, short_description, site_url,
-	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
-		tags, created_at, updated_at FROM aitool ORDER BY id LIMIT $1 OFFSET $2`
+	sql := `SELECT a.id, a.name, a.description, a.short_description, a.site_url,
+	    		a.instagram_url, a.discord_url, a.linkedin_url, a.github_url, a.profile_picture, 
+				a.tags, a.created_at, a.updated_at, at.tags_id, t.name as tag_name, t.color
+			FROM (SELECT * FROM aitool ORDER BY id LIMIT $1 OFFSET $2) a
+			LEFT JOIN aitool_tags at ON a.id = at.aitool_id 
+			LEFT JOIN tag t ON at.tags_id = t.id`
 
 	rows, err := conn.Query(sql, size, page*size)
 	if err != nil {
 		return
 	}
 
-	for rows.Next() {
-		var aitool AITool
+	aitoolMap := make(map[int]*AITool)
 
-		err = rows.Scan(&aitool.ID, &aitool.Name, &aitool.Description, &aitool.ShortDescription,
-			&aitool.SiteUrl, &aitool.InstagramUrl, &aitool.DiscordUrl, &aitool.LinkedinUrl,
-			&aitool.GithubUrl, &aitool.ProfilePicture, &aitool.Tags, &aitool.CreatedAt, &aitool.UpdatedAt)
+	for rows.Next() {
+		var aitoolID int
+		var aitoolName, shortDesc, desc,
+			profilePicture, siteUrl,
+			instagramUrl, discordUrl, linkedinUrl,
+			githubUrl, tags, createdAt, updatedAt, color *string
+		var tagId *int
+		var tagName *string
+
+		err = rows.Scan(&aitoolID, &aitoolName, &desc, &shortDesc,
+			&siteUrl, &instagramUrl, &discordUrl, &linkedinUrl,
+			&githubUrl, &profilePicture, &tags, &createdAt, &updatedAt, &tagId, &tagName, &color)
 		if err != nil {
-			continue
+			return
 		}
 
-		aitools = append(aitools, aitool)
+		if _, ok := aitoolMap[aitoolID]; !ok {
+			aitoolMap[aitoolID] = &AITool{
+				ID:               aitoolID,
+				Name:             aitoolName,
+				ShortDescription: shortDesc,
+				Description:      desc,
+				ProfilePicture:   profilePicture,
+				SiteUrl:          siteUrl,
+				InstagramUrl:     instagramUrl,
+				DiscordUrl:       discordUrl,
+				LinkedinUrl:      linkedinUrl,
+				GithubUrl:        githubUrl,
+				CreatedAt:        createdAt,
+				UpdatedAt:        updatedAt,
+				Tags:             make([]*AIToolTags, 0),
+			}
+		}
+
+		if tagId != nil {
+			aitoolMap[aitoolID].Tags = append(aitoolMap[aitoolID].Tags, &AIToolTags{
+				AIToolId: aitoolID,
+				TagId:    *tagId,
+				TagName:  *tagName,
+				Color:    *color,
+			})
+		}
+	}
+
+	for _, v := range aitoolMap {
+		aitools = append(aitools, v)
 	}
 
 	row := conn.QueryRow("SELECT COUNT(*) FROM aitool")
