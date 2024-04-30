@@ -30,6 +30,8 @@ func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 
 	defer conn.Close()
 
+	aitools = make([]*AITool, 0)
+
 	sql := `SELECT a.id, a.name, a.description, a.short_description, a.site_url,
 	    		a.instagram_url, a.discord_url, a.linkedin_url, a.github_url, a.profile_picture, 
 				a.tags, a.created_at, a.updated_at, at.tags_id, t.name as tag_name, t.color
