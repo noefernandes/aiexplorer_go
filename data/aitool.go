@@ -203,13 +203,13 @@ func Delete(id int) (res sql.Result, err error) {
 
 	defer conn.Close()
 
-	res, err = conn.Exec(`DELETE FROM aitool WHERE id = $1`, id)
+	res, err = conn.Exec(`DELETE FROM aitool_tags WHERE aitool_id = $1`, id)
 
 	if err != nil {
 		return
 	}
 
-	res, err = conn.Exec(`DELETE FROM aitool_tags WHERE aitool_id = $1`, id)
+	res, err = conn.Exec(`DELETE FROM aitool WHERE id = $1`, id)
 
 	return
 }
