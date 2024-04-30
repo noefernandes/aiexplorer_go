@@ -19,6 +19,8 @@ func GetAllTags() (tags []Tag, err error) {
 
 	defer conn.Close()
 
+	tags = make([]Tag, 0)
+
 	rows, err := conn.Query("SELECT id, name, color FROM tag")
 	if err != nil {
 		return
