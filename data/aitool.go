@@ -19,6 +19,7 @@ type AITool struct {
 	GithubUrl        *string `json:"github_url"`
 	CreatedAt        *string `json:"created_at"`
 	UpdatedAt        *string `json:"updated_at"`
+	Favorited        bool    `json:"favorited"`
 }
 
 func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
@@ -34,7 +35,7 @@ func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 
 	sql := `SELECT a.id, a.name, a.description, a.short_description, a.site_url,
 	    		a.instagram_url, a.discord_url, a.linkedin_url, a.github_url, a.profile_picture, 
-				a.tags, a.created_at, a.updated_at, at.tags_id, t.name as tag_name, t.color
+				a.tags, a.created_at, a.updated_at, favorited, at.tags_id, t.name as tag_name, t.color
 			FROM (SELECT * FROM aitool ORDER BY id LIMIT $1 OFFSET $2) a
 			LEFT JOIN aitool_tags at ON a.id = at.aitool_id 
 			LEFT JOIN tag t ON at.tags_id = t.id`
@@ -54,10 +55,11 @@ func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 			githubUrl, tags, createdAt, updatedAt, color *string
 		var tagId *int
 		var tagName *string
+		var favorited bool
 
 		err = rows.Scan(&aitoolID, &aitoolName, &desc, &shortDesc,
 			&siteUrl, &instagramUrl, &discordUrl, &linkedinUrl,
-			&githubUrl, &profilePicture, &tags, &createdAt, &updatedAt, &tagId, &tagName, &color)
+			&githubUrl, &profilePicture, &tags, &createdAt, &updatedAt, &favorited, &tagId, &tagName, &color)
 		if err != nil {
 			return
 		}
@@ -76,6 +78,7 @@ func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 				GithubUrl:        githubUrl,
 				CreatedAt:        createdAt,
 				UpdatedAt:        updatedAt,
+				Favorited:        false,
 				Tags:             make([]Tag, 0),
 			}
 		}
@@ -110,7 +113,7 @@ func Get(id int) (aitool AITool, err error) {
 
 	sql := `SELECT id, name, description, short_Description, site_url,
 	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
-		tags, created_at, updated_at FROM aitool WHERE id = $1`
+		tags, created_at, updated_at, favorited FROM aitool WHERE id = $1`
 
 	row := conn.QueryRow(sql, id)
 
@@ -136,10 +139,10 @@ func Save(aitool *AITool) (returned AITool, err error) {
 
 	sql := `INSERT INTO aitool (name, description, short_description, site_url,
 	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
-		created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 
-		$9, $10, $11) RETURNING id, name, description, short_description, site_url,
+		created_at, updated_at, favorited) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 
+		$9, $10, $11, $12) RETURNING id, name, description, short_description, site_url,
 	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
-		created_at, updated_at`
+		created_at, updated_at, favorited`
 
 	err = conn.QueryRow(sql, aitool.Name, aitool.Description, aitool.ShortDescription,
 		aitool.SiteUrl, aitool.InstagramUrl, aitool.DiscordUrl, aitool.LinkedinUrl,
@@ -147,7 +150,7 @@ func Save(aitool *AITool) (returned AITool, err error) {
 		aitool.UpdatedAt).Scan(&returned.ID, &returned.Name, &returned.Description, &returned.ShortDescription,
 		&returned.SiteUrl, &returned.InstagramUrl, &returned.DiscordUrl,
 		&returned.LinkedinUrl, &returned.GithubUrl, &returned.ProfilePicture,
-		&returned.CreatedAt, &returned.UpdatedAt)
+		&returned.CreatedAt, &returned.UpdatedAt, &returned.Favorited)
 
 	sql = `INSERT INTO aitool_tags (tags_id, aitool_id) VALUES ($1, $2)`
 
@@ -170,19 +173,19 @@ func Update(aitool *AITool) (returned AITool, err error) {
 	sql := `UPDATE aitool SET name = $1, description = $2, short_description = $3,
 				site_url = $4, instagram_url = $5, discord_url = $6, linkedin_url = $7, 
 				github_url = $8, profile_picture = $9, created_at = $10,
-				updated_at = $11
+				updated_at = $11, favorited = $12
 			WHERE id = $12 RETURNING id, name, description, short_description, site_url,
 	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
-		created_at, updated_at`
+		created_at, updated_at, favorited`
 
 	err = conn.QueryRow(sql, aitool.Name, aitool.Description, aitool.ShortDescription,
 		aitool.SiteUrl, aitool.InstagramUrl, aitool.DiscordUrl, aitool.LinkedinUrl,
 		aitool.GithubUrl, aitool.ProfilePicture, aitool.CreatedAt,
-		aitool.UpdatedAt, aitool.ID).Scan(&returned.ID, &returned.Name, &returned.Description,
+		aitool.UpdatedAt, aitool.Favorited, aitool.ID).Scan(&returned.ID, &returned.Name, &returned.Description,
 		&returned.ShortDescription, &returned.SiteUrl, &returned.InstagramUrl,
 		&returned.DiscordUrl, &returned.LinkedinUrl, &returned.GithubUrl,
 		&returned.ProfilePicture, &returned.CreatedAt,
-		&returned.UpdatedAt)
+		&returned.UpdatedAt, &returned.Favorited)
 
 	sql = `DELETE FROM aitool_tags WHERE aitool_id = $1`
 	conn.Exec(sql, aitool.ID)
