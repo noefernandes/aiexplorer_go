@@ -25,7 +25,7 @@ func main() {
 	c := cors.New(cors.Options{
 		AllowedHeaders: []string{"Content-Type", "Accept", "Authorization"},
 		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 	})
 
 	r.Use(c.Handler)
@@ -33,7 +33,7 @@ func main() {
 	r.Get(BASE_URL+"aitools", handlers.GetAll)
 	r.Get(BASE_URL+"aitool/{id}", handlers.Get)
 	r.Post(BASE_URL+"aitool", handlers.Save)
-	r.Put(BASE_URL+"aitool", handlers.Update)
+	r.Patch(BASE_URL+"aitool", handlers.Update)
 	r.Delete(BASE_URL+"aitool", handlers.Delete)
 
 	r.Get(BASE_URL+"tags", handlers.GetAllTags)

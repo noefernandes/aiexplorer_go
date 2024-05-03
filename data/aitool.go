@@ -78,7 +78,7 @@ func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 				GithubUrl:        githubUrl,
 				CreatedAt:        createdAt,
 				UpdatedAt:        updatedAt,
-				Favorited:        false,
+				Favorited:        favorited,
 				Tags:             make([]Tag, 0),
 			}
 		}
@@ -174,7 +174,7 @@ func Update(aitool *AITool) (returned AITool, err error) {
 				site_url = $4, instagram_url = $5, discord_url = $6, linkedin_url = $7, 
 				github_url = $8, profile_picture = $9, created_at = $10,
 				updated_at = $11, favorited = $12
-			WHERE id = $12 RETURNING id, name, description, short_description, site_url,
+			WHERE id = $13 RETURNING id, name, description, short_description, site_url,
 	    instagram_url, discord_url, linkedin_url, github_url, profile_picture, 
 		created_at, updated_at, favorited`
 
