@@ -22,28 +22,7 @@ type AITool struct {
 	Favorited        bool    `json:"favorited"`
 }
 
-func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
-	conn, err := db.OpenConnection()
-
-	if err != nil {
-		return
-	}
-
-	defer conn.Close()
-
-	aitools = make([]*AITool, 0)
-
-	sql := `SELECT a.id, a.name, a.description, a.short_description, a.site_url,
-	    		a.instagram_url, a.discord_url, a.linkedin_url, a.github_url, a.profile_picture, 
-				a.tags, a.created_at, a.updated_at, favorited, at.tags_id, t.name as tag_name, t.color
-			FROM (SELECT * FROM aitool ORDER BY id LIMIT $1 OFFSET $2) a
-			LEFT JOIN aitool_tags at ON a.id = at.aitool_id 
-			LEFT JOIN tag t ON at.tags_id = t.id`
-
-	rows, err := conn.Query(sql, size, page*size)
-	if err != nil {
-		return
-	}
+func BuildData(conn *sql.DB, rows *sql.Rows, sql string) (aitools []*AITool, err error) {
 
 	aitoolMap := make(map[int]*AITool)
 
@@ -96,7 +75,51 @@ func GetAll(page int, size int) (aitools []*AITool, count int, err error) {
 		aitools = append(aitools, v)
 	}
 
-	row := conn.QueryRow("SELECT COUNT(*) FROM aitool")
+	return
+}
+
+func GetAllWithPagination(page int, size int, favorities bool) (aitools []*AITool, count int, err error) {
+	conn, err := db.OpenConnection()
+
+	if err != nil {
+		return
+	}
+
+	defer conn.Close()
+
+	aitools = make([]*AITool, 0)
+
+	var sql string
+
+	if favorities {
+		sql = `SELECT a.id, a.name, a.description, a.short_description, a.site_url,
+	    		a.instagram_url, a.discord_url, a.linkedin_url, a.github_url, a.profile_picture, 
+				a.tags, a.created_at, a.updated_at, favorited, at.tags_id, t.name as tag_name, t.color
+			FROM (SELECT * FROM aitool ORDER BY id LIMIT $1 OFFSET $2) a
+			LEFT JOIN aitool_tags at ON a.id = at.aitool_id 
+			LEFT JOIN tag t ON at.tags_id = t.id
+			WHERE favorited = true
+			`
+	} else {
+		sql = `SELECT a.id, a.name, a.description, a.short_description, a.site_url,
+	    		a.instagram_url, a.discord_url, a.linkedin_url, a.github_url, a.profile_picture, 
+				a.tags, a.created_at, a.updated_at, favorited, at.tags_id, t.name as tag_name, t.color
+			FROM (SELECT * FROM aitool ORDER BY id LIMIT $1 OFFSET $2) a
+			LEFT JOIN aitool_tags at ON a.id = at.aitool_id 
+			LEFT JOIN tag t ON at.tags_id = t.id`
+	}
+
+	rows, err := conn.Query(sql, size, page*size)
+
+	aitools, err = BuildData(conn, rows, sql)
+
+	if favorities {
+		sql = `SELECT COUNT(*) FROM aitool WHERE favorited = true`
+	} else {
+		sql = `SELECT COUNT(*) FROM aitool`
+	}
+
+	row := conn.QueryRow(sql)
 	err = row.Scan(&count)
 
 	return

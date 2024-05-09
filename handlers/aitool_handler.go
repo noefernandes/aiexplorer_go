@@ -14,14 +14,19 @@ import (
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	size, err1 := strconv.Atoi(r.URL.Query().Get("size"))
 	page, err2 := strconv.Atoi(r.URL.Query().Get("page"))
+	favorities, err3 := strconv.ParseBool(r.URL.Query().Get("favorities"))
+
+	w.Header().Add("Content-Type", "application/json")
 
 	if err1 != nil || err2 != nil {
 		return
 	}
 
-	aitools, totalPages, err := data.GetAll(page, size)
+	if err3 != nil {
+		favorities = false
+	}
 
-	w.Header().Add("Content-Type", "application/json")
+	aitools, totalPages, err := data.GetAllWithPagination(page, size, favorities)
 
 	if err != nil {
 		json.NewEncoder(w).Encode(err)
