@@ -170,7 +170,7 @@ func Save(aitool *AITool) (returned AITool, err error) {
 	err = conn.QueryRow(sql, aitool.Name, aitool.Description, aitool.ShortDescription,
 		aitool.SiteUrl, aitool.InstagramUrl, aitool.DiscordUrl, aitool.LinkedinUrl,
 		aitool.GithubUrl, aitool.ProfilePicture, aitool.CreatedAt,
-		aitool.UpdatedAt).Scan(&returned.ID, &returned.Name, &returned.Description, &returned.ShortDescription,
+		aitool.UpdatedAt, aitool.Favorited).Scan(&returned.ID, &returned.Name, &returned.Description, &returned.ShortDescription,
 		&returned.SiteUrl, &returned.InstagramUrl, &returned.DiscordUrl,
 		&returned.LinkedinUrl, &returned.GithubUrl, &returned.ProfilePicture,
 		&returned.CreatedAt, &returned.UpdatedAt, &returned.Favorited)
